@@ -17,6 +17,11 @@ public class TextView : MonoBehaviour
         _text.SetText($"{_name}: {value.ToString(_format)}");
     }
 
+    public void UpdateText(Vector2 value)
+    {
+        _text.SetText($"{_name}: {value.ToString(_format)}");
+    }
+
     public void UpdateText(string value)
     {
         _text.SetText($"{_name}: {value}");

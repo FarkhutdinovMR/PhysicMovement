@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CharacterControllerMovement : MonoBehaviour, IMovement
 {
+    [SerializeField] private Stamina _stamina;
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private Transform _camera;
     [SerializeField] private float _walkSpeed;
@@ -10,6 +11,7 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
     [SerializeField] private float _gravityScale;
     [SerializeField] private float _acceleration;
     [SerializeField] private float _rotateSpeed;
+    [SerializeField] private float _runCostInStamin;
 
     public event Action<float> SpeedChanged;
 
@@ -61,6 +63,14 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
     private void ControlSpeed(Vector2 direction)
     {
         float speed = _targetSpeed;
+
+        if (speed == _runSpeed)
+        {
+            if (_stamina.isEmty)
+                speed = _walkSpeed;
+            else
+                _stamina.Spend(_runCostInStamin * Time.deltaTime);
+        }
 
         if (direction == Vector2.zero)
             speed = 0;

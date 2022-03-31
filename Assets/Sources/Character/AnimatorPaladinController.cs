@@ -10,5 +10,7 @@ public static class AnimatorPaladinController
         public const string Jump = nameof(Jump);
         public const string Block = nameof(Block);
         public const string Attack = nameof(Attack);
+        public const string RunningAttack = nameof(RunningAttack);
+        public const string Kick = nameof(Kick);
     }
 }

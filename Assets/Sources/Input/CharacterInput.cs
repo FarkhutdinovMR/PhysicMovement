@@ -65,6 +65,14 @@ public class @CharacterInput : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Kick"",
+                    ""type"": ""Button"",
+                    ""id"": ""4d67d4a9-431d-4b10-ba60-1af062bc5a49"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -221,6 +229,17 @@ public class @CharacterInput : IInputActionCollection, IDisposable
                     ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a23dbadc-3f9c-4830-a935-5addf8614596"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Kick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -235,6 +254,7 @@ public class @CharacterInput : IInputActionCollection, IDisposable
         m_Character_Run = m_Character.FindAction("Run", throwIfNotFound: true);
         m_Character_Block = m_Character.FindAction("Block", throwIfNotFound: true);
         m_Character_Attack = m_Character.FindAction("Attack", throwIfNotFound: true);
+        m_Character_Kick = m_Character.FindAction("Kick", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -290,6 +310,7 @@ public class @CharacterInput : IInputActionCollection, IDisposable
     private readonly InputAction m_Character_Run;
     private readonly InputAction m_Character_Block;
     private readonly InputAction m_Character_Attack;
+    private readonly InputAction m_Character_Kick;
     public struct CharacterActions
     {
         private @CharacterInput m_Wrapper;
@@ -300,6 +321,7 @@ public class @CharacterInput : IInputActionCollection, IDisposable
         public InputAction @Run => m_Wrapper.m_Character_Run;
         public InputAction @Block => m_Wrapper.m_Character_Block;
         public InputAction @Attack => m_Wrapper.m_Character_Attack;
+        public InputAction @Kick => m_Wrapper.m_Character_Kick;
         public InputActionMap Get() { return m_Wrapper.m_Character; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -327,6 +349,9 @@ public class @CharacterInput : IInputActionCollection, IDisposable
                 @Attack.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnAttack;
                 @Attack.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnAttack;
                 @Attack.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnAttack;
+                @Kick.started -= m_Wrapper.m_CharacterActionsCallbackInterface.OnKick;
+                @Kick.performed -= m_Wrapper.m_CharacterActionsCallbackInterface.OnKick;
+                @Kick.canceled -= m_Wrapper.m_CharacterActionsCallbackInterface.OnKick;
             }
             m_Wrapper.m_CharacterActionsCallbackInterface = instance;
             if (instance != null)
@@ -349,6 +374,9 @@ public class @CharacterInput : IInputActionCollection, IDisposable
                 @Attack.started += instance.OnAttack;
                 @Attack.performed += instance.OnAttack;
                 @Attack.canceled += instance.OnAttack;
+                @Kick.started += instance.OnKick;
+                @Kick.performed += instance.OnKick;
+                @Kick.canceled += instance.OnKick;
             }
         }
     }
@@ -361,5 +389,6 @@ public class @CharacterInput : IInputActionCollection, IDisposable
         void OnRun(InputAction.CallbackContext context);
         void OnBlock(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
+        void OnKick(InputAction.CallbackContext context);
     }
 }

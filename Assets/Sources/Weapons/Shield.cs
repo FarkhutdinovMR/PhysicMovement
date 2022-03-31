@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Shield : MonoBehaviour, IWeapon
+public class Shield : MonoBehaviour, IBlock
 {
     [SerializeField] private Animator _animator;
 
@@ -17,10 +17,5 @@ public class Shield : MonoBehaviour, IWeapon
     {
         _isBlock = false;
         _animator.SetBool(AnimatorPaladinController.States.Block, _isBlock);
-    }
-
-    public void Use(Action onEnd)
-    {
-        throw new NotImplementedException();
     }
 }

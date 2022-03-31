@@ -6,20 +6,22 @@ public partial class Input : MonoBehaviour
 {
     [SerializeField] private MonoBehaviour _iMovement;
     [SerializeField] private MonoBehaviour _iShield;
-    [SerializeField] private MonoBehaviour _iSword;
+    [SerializeField] private DefaultAttack _rightHandWeapon;
     [SerializeField] private ThirdPersonCamera _thirdPersonCamera;
+    [SerializeField] private Kick _kick;
 
     private IMovement _movement => (IMovement)_iMovement;
-    private IWeapon _shield => (IWeapon)_iShield;
-    private IWeapon _sword => (IWeapon)_iSword;
+    private IBlock _shield => (IBlock)_iShield;
     private CharacterInput _input;
     private bool _isAttack;
+    private bool _isRun;
+    private bool _isKick;
 
     public CharacterInput CharacterInput => _input;
 
     private void OnValidate()
     {
-        if (_iMovement is IMovement && _iShield is IWeapon && _sword is IWeapon)
+        if (_iMovement is IMovement && _iShield is IBlock)
             return;
 
         Debug.Log(_iMovement.name + " not implement " + nameof(IMovement));
@@ -37,6 +39,7 @@ public partial class Input : MonoBehaviour
         _input.Character.Block.performed += OnBlockPerformed;
         _input.Character.Block.canceled += OnBlockCanceled;
         _input.Character.Attack.performed += OnAttackPerformed;
+        _input.Character.Kick.performed += OnKickPerformed;
     }
 
     private void OnDisable()
@@ -47,12 +50,14 @@ public partial class Input : MonoBehaviour
         _input.Character.Run.canceled -= OnRunCanceled;
         _input.Character.Block.performed -= OnBlockPerformed;
         _input.Character.Block.canceled -= OnBlockCanceled;
+        _input.Character.Attack.performed -= OnAttackPerformed;
+        _input.Character.Kick.performed -= OnKickPerformed;
         _input.Disable();
     }
 
     private void Update()
     {
-        if (_isAttack)
+        if (_isAttack || _isKick)
             _movement.Move(Vector2.zero);
         else
             _movement.Move(_input.Character.Move.ReadValue<Vector2>());
@@ -72,11 +77,13 @@ public partial class Input : MonoBehaviour
 
     private void OnRunPerformed(InputAction.CallbackContext context)
     {
+        _isRun = true;
         _movement.Run();
     }
 
     private void OnRunCanceled(InputAction.CallbackContext context)
     {
+        _isRun = false;
         _movement.StopRun();
     }
 
@@ -92,12 +99,41 @@ public partial class Input : MonoBehaviour
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
+        if (_isKick)
+            return;
+
+        if (_isRun)
+        {
+            if (_rightHandWeapon.TryGetComponent(out IRunningAttack attack))
+                attack.AttackInRunning(OnAttackEnded);
+        }
+        else
+        {
+            if (_rightHandWeapon.TryGetComponent(out ISimpleAttack attack))
+                attack.Attack(OnAttackEnded);
+            else
+                return;
+        }
+
         _isAttack = true;
-        _sword.Use(OnAttackEnded);
+    }
+
+    private void OnKickPerformed(InputAction.CallbackContext context)
+    {
+        if (_isAttack)
+            return;
+
+        _isKick = true;
+        _kick.Attack(OnKickEnded);
     }
 
     private void OnAttackEnded()
     {
         _isAttack = false;
+    }
+
+    private void OnKickEnded()
+    {
+        _isKick = false;
     }
 }

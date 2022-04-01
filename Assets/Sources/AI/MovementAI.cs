@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,13 +8,13 @@ public class MovementAI : MonoBehaviour
 {
     [SerializeField] private CharacterControllerMovement _movement;
     [SerializeField] private NavMeshAgent _navMeshAgent;
-    [SerializeField] private Transform _target;
-    [SerializeField] private float _changeDistance;
     [SerializeField] private float _stopDistance;
     [SerializeField] private float _angularSpeed;
 
-    private Vector3 _previousTargetPosition;
+    private const float MoveDelta = 1;
     private int _currentCornerIndex;
+
+    public event Action WayPassed;
 
     private Vector3 _currentPositionAtPath => _navMeshAgent.path.corners[_currentCornerIndex];
 
@@ -21,42 +22,33 @@ public class MovementAI : MonoBehaviour
 
     private void Start()
     {
-        _changeDistance *= _changeDistance;
+        _navMeshAgent.stoppingDistance = _stopDistance;
         _stopDistance *= _stopDistance;
         _navMeshAgent.updatePosition = false;
         _navMeshAgent.updateRotation = false;
     }
 
-    private void Update()
+    public void Move()
     {
-        CalculatePath();
         MoveToTarget();
-
-        _previousTargetPosition = _target.position;
     }
 
-    private void CalculatePath()
+    public void SetDestination(Vector3 position)
     {
-        if (Vector3.SqrMagnitude(_previousTargetPosition - transform.position) < _changeDistance)
-            return;
-
-        _navMeshAgent.SetDestination(_target.position);
+        _navMeshAgent.SetDestination(position);
         _currentCornerIndex = 0;
     }
 
     private void MoveToTarget()
     {
-        if (_navMeshAgent.pathPending || _navMeshAgent.remainingDistance <= _navMeshAgent.stoppingDistance)
-        {
-            _movement.MoveForward(0);
+        if (_navMeshAgent.pathPending)
             return;
-        }
 
         if (Vector3.SqrMagnitude(transform.position - _currentPositionAtPath) <= _stopDistance)
         {
             if (_isLastCorner)
             {
-                _movement.MoveForward(0);
+                WayPassed?.Invoke();
                 return;
             }
 
@@ -64,7 +56,7 @@ public class MovementAI : MonoBehaviour
         }
 
         RotateToTarget(_currentPositionAtPath);
-        _movement.MoveForward(1);
+        _movement.MoveForward(MoveDelta);
         _navMeshAgent.nextPosition = transform.position;
     }
 

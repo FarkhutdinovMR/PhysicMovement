@@ -13,6 +13,8 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
 
     public event Action<float> SpeedChanged;
 
+    private float _delta => new Vector2(_desiredMove.x, _desiredMove.z).magnitude;
+
     private const float _groundGravity = -0.05f;
     private Vector3 _desiredMove;
     private float _currentSpeed;
@@ -21,17 +23,19 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
     private void Start()
     {
         _targetSpeed = _walkSpeed;
-        _desiredMove = transform.position;
+    }
+
+    private void Update()
+    {
+        ApplyGravity();
+        ControlSpeed(_delta);
+        _characterController.Move(_desiredMove);
+        _desiredMove = new Vector3(0, _desiredMove.y, 0);
     }
 
     public void MoveForward(float delta)
     {
         _desiredMove = new Vector3(transform.forward.x, _desiredMove.y, transform.forward.z) * delta;
-
-        ApplyGravity();
-        ControlSpeed(delta);
-
-        _characterController.Move(_desiredMove);
     }
 
     public void Jump()

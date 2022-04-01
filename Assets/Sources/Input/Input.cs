@@ -58,15 +58,15 @@ public partial class Input : MonoBehaviour
 
     private void Update()
     {
-        Vector2 direction;
-
         if (_isAttack)
-            direction = Vector2.zero;
-        else
-            direction = _input.Character.Move.ReadValue<Vector2>();
+            return;
 
-        LookToCameraDirection(direction);
-        _movement.MoveForward(direction.magnitude);
+        if (_input.Character.Move.phase == InputActionPhase.Waiting)
+            return;
+
+        Vector2 moveInput = _input.Character.Move.ReadValue<Vector2>();
+        RotateToCameraForward(moveInput);
+        _movement.MoveForward(moveInput.magnitude);
     }
 
     private void OnLookPerformed(InputAction.CallbackContext context)
@@ -130,7 +130,7 @@ public partial class Input : MonoBehaviour
         _isAttack = false;
     }
 
-    private void LookToCameraDirection(Vector2 direction)
+    private void RotateToCameraForward(Vector2 direction)
     {
         if (direction == Vector2.zero)
             return;

@@ -2,10 +2,11 @@
 using System.Collections;
 using UnityEngine;
 
-public abstract class DefaultAttack : MonoBehaviour
+public class DefaultAttack : MonoBehaviour
 {
     [SerializeField] private Animator _animator;
     [SerializeField] private PhysicBroadsaster _collider;
+    [SerializeField] private float _damage;
 
     private Action _onEnd;
     private bool _isAttack;
@@ -20,7 +21,7 @@ public abstract class DefaultAttack : MonoBehaviour
         _collider.Collised -= OnCollised;
     }
 
-    protected void Attack(string animation, Action onEnd)
+    public void Attack(string animation, Action onEnd)
     {
         if (_isAttack)
             return;
@@ -47,7 +48,16 @@ public abstract class DefaultAttack : MonoBehaviour
     private void OnCollised(GameObject obj)
     {
         if (_isAttack)
+        {
+            SendDamage(obj);
             TryPushObject(obj);
+        }
+    }
+
+    private void SendDamage(GameObject obj)
+    {
+        if (obj.Equals(gameObject) == false && obj.TryGetComponent(out Health health) && health.IsAlive)
+            health.TakeDamage(_damage);
     }
 
     private void TryPushObject(GameObject obj)

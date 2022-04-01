@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class RigidbodyKinematicMovement : MonoBehaviour, IMovement
+public class RigidbodyKinematicMovement : MonoBehaviour
 {
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private GroundChecker _groundChecker;
@@ -20,7 +20,7 @@ public class RigidbodyKinematicMovement : MonoBehaviour, IMovement
         Gizmos.DrawRay(transform.position, _desiredMove);
     }
 
-    public void Move(Vector2 direction)
+    public void MoveForward(Vector2 direction)
     {
         Vector3 forward = transform.forward * direction.y;
         Vector3 sideways = transform.right * direction.x;

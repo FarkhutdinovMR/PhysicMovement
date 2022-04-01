@@ -5,12 +5,10 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
 {
     [SerializeField] private Stamina _stamina;
     [SerializeField] private CharacterController _characterController;
-    [SerializeField] private Transform _camera;
     [SerializeField] private float _walkSpeed;
     [SerializeField] private float _runSpeed;
     [SerializeField] private float _gravityScale;
     [SerializeField] private float _acceleration;
-    [SerializeField] private float _rotateSpeed;
     [SerializeField] private float _runCostInStamin;
 
     public event Action<float> SpeedChanged;
@@ -26,14 +24,12 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
         _desiredMove = transform.position;
     }
 
-    public void Move(Vector2 direction)
+    public void MoveForward(float delta)
     {
-        LookToCameraDirection(direction);
-
-        _desiredMove = new Vector3(transform.forward.x, _desiredMove.y, transform.forward.z) * direction.magnitude;
+        _desiredMove = new Vector3(transform.forward.x, _desiredMove.y, transform.forward.z) * delta;
 
         ApplyGravity();
-        ControlSpeed(direction);
+        ControlSpeed(delta);
 
         _characterController.Move(_desiredMove);
     }
@@ -60,7 +56,7 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
             _desiredMove += Physics.gravity * _gravityScale;
     }
 
-    private void ControlSpeed(Vector2 direction)
+    private void ControlSpeed(float delta)
     {
         float speed = _targetSpeed;
 
@@ -72,23 +68,12 @@ public class CharacterControllerMovement : MonoBehaviour, IMovement
                 _stamina.Spend(_runCostInStamin * Time.deltaTime);
         }
 
-        if (direction == Vector2.zero)
+        if (delta == 0)
             speed = 0;
 
         _currentSpeed = Mathf.MoveTowards(_currentSpeed, speed, _acceleration * Time.deltaTime);
         _desiredMove *= _currentSpeed * Time.deltaTime;
 
         SpeedChanged?.Invoke(_currentSpeed);
-    }
-
-    private void LookToCameraDirection(Vector2 direction)
-    {
-        if (direction == Vector2.zero)
-            return;
-
-        Vector3 forward = _camera.forward * direction.y + _camera.right * direction.x;
-        forward = new Vector3(forward.x, 0, forward.z);
-        Quaternion target = Quaternion.LookRotation(forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, target, _rotateSpeed * Time.deltaTime);
     }
 }

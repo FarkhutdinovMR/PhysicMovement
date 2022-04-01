@@ -6,16 +6,17 @@ public partial class Input : MonoBehaviour
 {
     [SerializeField] private MonoBehaviour _iMovement;
     [SerializeField] private MonoBehaviour _iShield;
-    [SerializeField] private DefaultAttack _rightHandWeapon;
+    [SerializeField] private Sword _rightHandWeapon;
     [SerializeField] private ThirdPersonCamera _thirdPersonCamera;
     [SerializeField] private Kick _kick;
+    [SerializeField] private Transform _camera;
+    [SerializeField] private float _rotateSpeed;
 
     private IMovement _movement => (IMovement)_iMovement;
     private IBlock _shield => (IBlock)_iShield;
     private CharacterInput _input;
     private bool _isAttack;
     private bool _isRun;
-    private bool _isKick;
 
     public CharacterInput CharacterInput => _input;
 
@@ -57,10 +58,15 @@ public partial class Input : MonoBehaviour
 
     private void Update()
     {
-        if (_isAttack || _isKick)
-            _movement.Move(Vector2.zero);
+        Vector2 direction;
+
+        if (_isAttack)
+            direction = Vector2.zero;
         else
-            _movement.Move(_input.Character.Move.ReadValue<Vector2>());
+            direction = _input.Character.Move.ReadValue<Vector2>();
+
+        LookToCameraDirection(direction);
+        _movement.MoveForward(direction.magnitude);
     }
 
     private void OnLookPerformed(InputAction.CallbackContext context)
@@ -99,23 +105,15 @@ public partial class Input : MonoBehaviour
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        if (_isKick)
+        if (_isAttack)
             return;
 
-        if (_isRun)
-        {
-            if (_rightHandWeapon.TryGetComponent(out IRunningAttack attack))
-                attack.AttackInRunning(OnAttackEnded);
-        }
-        else
-        {
-            if (_rightHandWeapon.TryGetComponent(out ISimpleAttack attack))
-                attack.Attack(OnAttackEnded);
-            else
-                return;
-        }
-
         _isAttack = true;
+
+        if (_isRun)
+            _rightHandWeapon.AttackInRunning(OnAttackEnded);
+        else
+            _rightHandWeapon.Attack(OnAttackEnded);
     }
 
     private void OnKickPerformed(InputAction.CallbackContext context)
@@ -123,8 +121,8 @@ public partial class Input : MonoBehaviour
         if (_isAttack)
             return;
 
-        _isKick = true;
-        _kick.Attack(OnKickEnded);
+        _isAttack = true;
+        _kick.Attack(OnAttackEnded);
     }
 
     private void OnAttackEnded()
@@ -132,8 +130,14 @@ public partial class Input : MonoBehaviour
         _isAttack = false;
     }
 
-    private void OnKickEnded()
+    private void LookToCameraDirection(Vector2 direction)
     {
-        _isKick = false;
+        if (direction == Vector2.zero)
+            return;
+
+        Vector3 forward = _camera.forward * direction.y + _camera.right * direction.x;
+        forward = new Vector3(forward.x, 0, forward.z);
+        Quaternion target = Quaternion.LookRotation(forward);
+        transform.rotation = Quaternion.Slerp(transform.rotation, target, _rotateSpeed * Time.deltaTime);
     }
 }

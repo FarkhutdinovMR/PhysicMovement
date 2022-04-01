@@ -11,19 +11,19 @@ public interface IValue
 
 public class ProgressBar : MonoBehaviour
 {
-    [SerializeField] private Slider _slider;
+    [SerializeField] private Image _slider;
     [SerializeField] private MonoBehaviour _valueObject;
 
     private IValue _value => (IValue)_valueObject;
 
-    private void OnValidate()
-    {
-        if (_valueObject is IValue)
-            return;
+    //private void OnValidate()
+    //{
+    //    if (_valueObject is IValue)
+    //        return;
 
-        Debug.Log(_valueObject + " not implement " + nameof(IValue));
-        _valueObject = null;
-    }
+    //    Debug.Log(_valueObject.name + " not implement " + nameof(IValue));
+    //    _valueObject = null;
+    //}
 
     private void OnEnable()
     {
@@ -37,6 +37,6 @@ public class ProgressBar : MonoBehaviour
 
     private void OnChanged(float value, float _maxValue)
     {
-        _slider.value = value / _maxValue;
+        _slider.fillAmount = value / _maxValue;
     }
 }

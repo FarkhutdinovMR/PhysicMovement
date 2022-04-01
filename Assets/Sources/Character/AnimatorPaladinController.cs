@@ -12,5 +12,7 @@ public static class AnimatorPaladinController
         public const string Attack = nameof(Attack);
         public const string RunningAttack = nameof(RunningAttack);
         public const string Kick = nameof(Kick);
+        public const string DamageRecieved = nameof(DamageRecieved);
+        public const string Dying = nameof(Dying);
     }
 }
